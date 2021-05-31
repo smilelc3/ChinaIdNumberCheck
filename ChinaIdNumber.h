@@ -6,7 +6,7 @@
 #define CHINA_ID_NUMBER_H
 
 #include <array>
-#include <map>
+#include <unordered_map>
 #include <string>
 
 class ChinaIdNumber {
@@ -60,14 +60,11 @@ public:
     std::wstring GetAgeInfo();
 
 private:
-    // 地区码与地区名对应Map
-    std::map<std::array<char, 6>, std::wstring> areaNameMap;
+    // 地区码与地区名+标准年份对应Map
+    std::unordered_map<std::string, std::pair<std::wstring, std::string>> areaNameMap;
 
     // 读取CSV文件，并初始化AreaNameMap
     void initAreaNameMap(std::string &csvFilePath);
-
-    // 获取6位区域ID
-    inline std::array<char, 6> getAreaId();
 
     // 根据idx获取char
     inline char getCharByIdx(size_t idx);

@@ -42,12 +42,6 @@ ChinaIdNumber::ChinaIdNumber(std::string &idStr, std::string csvFilePath) {
 }
 
 
-inline std::array<char, 6> ChinaIdNumber::getAreaId() {
-    return std::array<char, 6>{ProvinceId[0], ProvinceId[1],
-                               CityId[0], CityId[1],
-                               CountyId[0], CountyId[1]};
-}
-
 void ChinaIdNumber::initAreaNameMap(std::string &csvFilePath) {
     std::ifstream fp(csvFilePath);
     std::string line;  // 每行 bytes源码
@@ -60,7 +54,7 @@ void ChinaIdNumber::initAreaNameMap(std::string &csvFilePath) {
         std::stringstream lineStream(line);
         std::string itemStr;
         std::string year;
-        std::array<char, 6> areaId{};
+        std::string areaCode;
         std::wstring areaName;
 
         // 按照逗号分隔,并赋值给year, areaId, areaName
@@ -69,48 +63,37 @@ void ChinaIdNumber::initAreaNameMap(std::string &csvFilePath) {
                 itemStr.erase(itemStr.size() - 1);
             }
 
-            if (col == 0) {
-                // 标准年份
-                year = itemStr;
-            } else if (col == 1) {
-                // 地区码
-                for (auto idx = 0; idx < areaId.size(); idx++) {
-                    areaId[idx] = itemStr.at(idx);
-                }
+            if (col == 0) { // 标准年份
+                year = std::move(itemStr);
+            } else if (col == 1) { // 地区码
+                areaCode = std::move(itemStr);
             } else if (col == 2) {
-                areaName = converter.from_bytes(itemStr);
+                areaName = std::move(converter.from_bytes(itemStr));
             }
             col++;
         }
-
-        if (areaId[2] == '0' and areaId[3] == '0') {        // 省级代码
-            areaNameMap[areaId] = areaName;
-        } else {
-            if (areaId[4] == '0' and areaId[5] == '0') {    // 市级别代码
-                auto provinceFullId = areaId;
-                provinceFullId[2] = provinceFullId[3] = '0';
-                areaNameMap[areaId] = areaNameMap[provinceFullId] + areaName;
-            } else {
-                auto cityFullId = areaId;
-                cityFullId[4] = cityFullId[5] = '0';
-                auto iter = areaNameMap.find(cityFullId);
-                if (iter == areaNameMap.end()) {
-                    cityFullId[2] = cityFullId[3] = '0';
-                    areaNameMap[areaId] = areaNameMap[cityFullId] + areaName;   // 直辖市
-                } else {
-                    // 地级市
-                    areaNameMap[areaId] = iter->second + areaName;
-
-                }
-
-            }
-        }
+        this->areaNameMap[areaCode] = {areaName, year};
         row++;
     }
 }
 
 std::wstring ChinaIdNumber::GetAreaInfo() {
-    return this->areaNameMap[getAreaId()];
+    std::wstring res;
+    auto areaCode = this->GetAreaCode();
+    decltype(areaNameMap)::iterator iter;
+    iter = areaNameMap.find(areaCode.substr(0,2) + "0000");
+    if (iter != areaNameMap.end()) {
+        res.append(iter->second.first);
+    }
+    iter = areaNameMap.find(areaCode.substr(0,4) + "00");
+    if (iter != areaNameMap.end()) {
+        res.append(iter->second.first);
+    }
+    iter = areaNameMap.find(areaCode);
+    if (iter != areaNameMap.end()) {
+        res.append(iter->second.first);
+    }
+    return res;
 }
 
 std::wstring ChinaIdNumber::GetBirthInfo() {
@@ -172,7 +155,13 @@ char ChinaIdNumber::getCharByIdx(size_t idx) {
 
 std::string ChinaIdNumber::GetAreaCode() {
     std::stringstream ss;
-    for (const auto &item : this->getAreaId()) {
+    for (const auto &item : this->ProvinceId) {
+        ss << item;
+    }
+    for (const auto &item : this->CityId) {
+        ss << item;
+    }
+    for (const auto &item : this->CountyId) {
         ss << item;
     }
     return ss.str();

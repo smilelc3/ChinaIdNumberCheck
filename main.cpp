@@ -1,10 +1,14 @@
 #include <iostream>
 #include <string>
+#include <locale>
+#include <codecvt>
 #include "ChinaIdNumber.h"
 
 int main(int argc, char *argv[]) {
     std::string id;
-    std::wcout.imbue(std::locale("chs"));
+    std::locale::global(std::locale(""));
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> conv; //定义utf-8 -> utf-16 转换器
+
     // 第一个参数argv[0]一定是程序的名称，并且包含了程序所在的完整路径
     if (argc > 2) {
         std::wcout << L"仅支持*18位身份证号*作为单参数" << std::endl;
@@ -18,13 +22,11 @@ int main(int argc, char *argv[]) {
     }
     if (argc == 2) {
         id = argv[1];
-        std::wcout << L"身份证号：";
-        std::cout << id << std::endl;
+        std::wcout << L"身份证号：" << conv.from_bytes(id) << std::endl;
     }
 
     auto chinaIdNumber = new ChinaIdNumber(id);
-    std::wcout << L"地区代码：";
-    std::cout << chinaIdNumber->GetAreaCode() << std::endl;
+    std::wcout << L"地区代码：" << conv.from_bytes(chinaIdNumber->GetAreaCode()) << std::endl;
     std::wcout << L"地区：" << chinaIdNumber->GetAreaInfo() << std::endl;
     std::wcout << L"出生日期：" << chinaIdNumber->GetBirthInfo() << std::endl;
     std::wcout << L"性别：" << chinaIdNumber->GetGenderInfo() << std::endl;

@@ -65,6 +65,10 @@ void ChinaIdNumber::initAreaNameMap(std::string &csvFilePath) {
 
         // 按照逗号分隔,并赋值给year, areaId, areaName
         while (getline(lineStream, itemStr, ',')) {
+            if (not itemStr.empty() and itemStr.back() == '\r') {
+                itemStr.erase(itemStr.size() - 1);
+            }
+
             if (col == 0) {
                 // 标准年份
                 year = itemStr;
@@ -179,10 +183,8 @@ std::wstring ChinaIdNumber::GetAgeInfo() {
 }
 
 int ChinaIdNumber::calcAge() {
-    struct tm t{};   //tm结构指针
-    time_t now;  //声明time_t类型变量
-    time(&now);      //获取系统日期和时间
-    localtime_s(&t, &now);   //获取当地日期和时间
+    std::time_t t = std::time(nullptr);   // get time now
+    std::tm *now = std::localtime(&t);
     int birthYear = (BirthYear[0] - '0') * 1000
                     + (BirthYear[1] - '0') * 100
                     + (BirthYear[2] - '0') * 10
@@ -193,8 +195,8 @@ int ChinaIdNumber::calcAge() {
     // 当前年份：t.tm_year + 1900
     // 当前月份：t.tm_mon + 1
     // 当前日：t.tm_mday
-    auto age = t.tm_year + 1900 - birthYear;
-    if (t.tm_mon + 1 < birthMonth or (t.tm_mon +1 == birthMonth and t.tm_mday < birthDay)) {
+    auto age = now->tm_year + 1900 - birthYear;
+    if (now->tm_mon + 1 < birthMonth or (now->tm_mon + 1 == birthMonth and now->tm_mday < birthDay)) {
         age--;
     }
     return age;

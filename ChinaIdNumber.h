@@ -37,8 +37,8 @@ public:
 
 
     // csv文件来自于 https://github.com/jxlwqq/address-code-of-china 项目
-    explicit ChinaIdNumber(std::array<char, 18> &id, std::string csvFilePath = "address_code.csv");
-    explicit ChinaIdNumber(std::string &idStr, std::string csvFilePath = "address_code.csv");
+    explicit ChinaIdNumber(std::array<char, 18> &id);
+    explicit ChinaIdNumber(std::string &idStr);
 
 
     // 获取地区信息
@@ -59,12 +59,14 @@ public:
     // 获取年龄信息
     std::wstring GetAgeInfo();
 
-private:
-    // 地区码与地区名+标准年份对应Map
-    std::unordered_map<std::string, std::pair<std::wstring, std::string>> areaNameMap;
-
     // 读取CSV文件，并初始化AreaNameMap
-    void initAreaNameMap(std::string &csvFilePath);
+    static void InitAreaNameMap(const std::string& csvFilePath = "address_code.csv");
+
+protected:
+    // 地区码与地区名+标准年份对应Map
+    static std::unordered_map<std::string, std::pair<std::wstring, std::string>> areaNameMap;
+
+private:
 
     // 根据idx获取char
     inline char getCharByIdx(size_t idx);
@@ -72,6 +74,8 @@ private:
     // 计算年龄
     int calcAge();
 };
+
+
 
 
 #endif //CHINA_ID_NUMBER_H

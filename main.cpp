@@ -24,6 +24,11 @@ int main(int argc, char *argv[]) {
         id = argv[1];
         std::wcout << L"身份证号：" << conv.from_bytes(id) << std::endl;
     }
+    // 初始化CSV文件
+    ChinaIdNumber::InitAreaNameMap();
+
+    // 给定CVS文件地址初始化
+    //ChinaIdNumber::InitAreaNameMap(R"(C:\Users\smile\Documents\GitHub\ChinaIdNumberCheck\cmake-build-debug\address_code.csv)");
 
     auto chinaIdNumber = new ChinaIdNumber(id);
     std::wcout << L"地区代码：" << conv.from_bytes(chinaIdNumber->GetAreaCode()) << std::endl;

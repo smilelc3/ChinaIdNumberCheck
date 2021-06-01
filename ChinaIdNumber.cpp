@@ -11,7 +11,8 @@
 #include <utility>
 #include <ctime>
 
-ChinaIdNumber::ChinaIdNumber(std::array<char, 18> &id, std::string csvFilePath) {
+// 构造函数实现
+ChinaIdNumber::ChinaIdNumber(std::array<char, 18> &id) {
     this->ProvinceId = {id[0], id[1]};
     this->CityId = {id[2], id[3]};
     this->CountyId = {id[4], id[5]};
@@ -25,12 +26,10 @@ ChinaIdNumber::ChinaIdNumber(std::array<char, 18> &id, std::string csvFilePath) 
 
     this->CheckCode = {id[17]};
 
-    initAreaNameMap(csvFilePath);
-
     this->isLegal = this->CheckCode.front() == CalcCheckCode();
 }
 
-ChinaIdNumber::ChinaIdNumber(std::string &idStr, std::string csvFilePath) {
+ChinaIdNumber::ChinaIdNumber(std::string &idStr) {
     if (idStr.size() != 18) {
         throw std::length_error("id size must be 18");
     }
@@ -38,11 +37,13 @@ ChinaIdNumber::ChinaIdNumber(std::string &idStr, std::string csvFilePath) {
     for (auto idx = 0; idx < 18; idx++) {
         id[idx] = idStr[idx];
     }
-    new(this) ChinaIdNumber(id, std::move(csvFilePath));
+    new(this) ChinaIdNumber(id);
 }
 
+// 静态成员实现，预分配空间大小
+decltype(ChinaIdNumber::areaNameMap) ChinaIdNumber::areaNameMap(1<<18); // NOLINT
 
-void ChinaIdNumber::initAreaNameMap(std::string &csvFilePath) {
+void ChinaIdNumber::InitAreaNameMap(const std::string& csvFilePath) {
     std::ifstream fp(csvFilePath);
     std::string line;  // 每行 bytes源码
     size_t row = 0;
@@ -72,7 +73,7 @@ void ChinaIdNumber::initAreaNameMap(std::string &csvFilePath) {
             }
             col++;
         }
-        this->areaNameMap[areaCode] = {areaName, year};
+        areaNameMap[areaCode] = {areaName, year};
         row++;
     }
 }
@@ -127,7 +128,7 @@ char ChinaIdNumber::CalcCheckCode() {
     for (auto idx = 0; idx < weights.size(); idx++) {
         sum += weights[idx] * (this->getCharByIdx(idx) - '0');
     }
-    char checkCode = '0' + (12 - (sum % 11)) % 11;
+    char checkCode = char('0' + (12 - (sum % 11)) % 11);
     return checkCode <= '9' ? checkCode : 'X';
 }
 
@@ -190,4 +191,5 @@ int ChinaIdNumber::calcAge() {
     }
     return age;
 }
+
 

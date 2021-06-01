@@ -54,7 +54,7 @@ void ChinaIdNumber::InitAreaNameMap(const std::string& csvFilePath) {
         size_t col = 0;
         std::stringstream lineStream(line);
         std::string itemStr;
-        std::string year;
+        std::wstring year;
         std::string areaCode;
         std::wstring areaName;
 
@@ -65,7 +65,7 @@ void ChinaIdNumber::InitAreaNameMap(const std::string& csvFilePath) {
             }
 
             if (col == 0) { // 标准年份
-                year = std::move(itemStr);
+                year = std::move(converter.from_bytes(itemStr));
             } else if (col == 1) { // 地区码
                 areaCode = std::move(itemStr);
             } else if (col == 2) {
@@ -79,23 +79,28 @@ void ChinaIdNumber::InitAreaNameMap(const std::string& csvFilePath) {
 }
 
 std::wstring ChinaIdNumber::GetAreaInfo() {
-    std::wstring res;
+    std::wstring areaFullName, releaseYear;
     auto areaCode = this->GetAreaCode();
     decltype(areaNameMap)::iterator iter;
     iter = areaNameMap.find(areaCode.substr(0,2) + "0000");
     if (iter != areaNameMap.end()) {
-        res.append(iter->second.first);
+        areaFullName.append(iter->second.first);
+        releaseYear = iter->second.second;
     }
     iter = areaNameMap.find(areaCode.substr(0,4) + "00");
     if (iter != areaNameMap.end()) {
-        res.append(iter->second.first);
+        areaFullName.append(iter->second.first);
+        releaseYear = iter->second.second;
     }
     iter = areaNameMap.find(areaCode);
     if (iter != areaNameMap.end()) {
-        res.append(iter->second.first);
+        areaFullName.append(iter->second.first);
+        releaseYear = iter->second.second;
     }
-    return res;
+
+    return areaFullName + L"（" + releaseYear + L"年标准）";
 }
+
 
 std::wstring ChinaIdNumber::GetBirthInfo() {
     std::wstringstream wss;
@@ -191,5 +196,6 @@ int ChinaIdNumber::calcAge() {
     }
     return age;
 }
+
 
 

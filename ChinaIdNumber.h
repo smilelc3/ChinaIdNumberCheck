@@ -44,6 +44,7 @@ public:
     // 获取地区信息
     std::wstring GetAreaInfo();
 
+
     // 获取地区6位代码（以string返回）
     std::string GetAreaCode();
 
@@ -64,7 +65,7 @@ public:
 
 protected:
     // 地区码与地区名+标准年份对应Map
-    static std::unordered_map<std::string, std::pair<std::wstring, std::string>> areaNameMap;
+    static std::unordered_map<std::string, std::pair<std::wstring, std::wstring>> areaNameMap;
 
 private:
 

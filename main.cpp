@@ -17,26 +17,34 @@ int main(int argc, char *argv[]) {
 
     if (argc == 1) {
         //没有附加参数
-        std::wcout << L"请输入18位身份证号：";
+        std::wcout << L"请输入18位身份证号：" << std::flush;
         std::cin >> id;
     }
     if (argc == 2) {
         id = argv[1];
-        std::wcout << L"身份证号：" << conv.from_bytes(id) << std::endl;
     }
-    // 初始化CSV文件
-    ChinaIdNumber::InitAreaNameMap();
+    try {
 
-    // 给定CVS文件地址初始化
-    //ChinaIdNumber::InitAreaNameMap(R"(C:\Users\smile\Documents\GitHub\ChinaIdNumberCheck\cmake-build-debug\address_code.csv)");
+        // 初始化CSV文件
+        ChinaIdNumber::InitAreaNameMap();
 
-    auto chinaIdNumber = new ChinaIdNumber(id);
-    std::wcout << L"地区代码：" << conv.from_bytes(chinaIdNumber->GetAreaCode()) << std::endl;
-    std::wcout << L"地区：" << chinaIdNumber->GetAreaInfo() << std::endl;
-    std::wcout << L"出生日期：" << chinaIdNumber->GetBirthInfo() << std::endl;
-    std::wcout << L"性别：" << chinaIdNumber->GetGenderInfo() << std::endl;
-    std::wcout << L"年龄：" << chinaIdNumber->GetAgeInfo() << std::endl;
-    std::wcout << L"合法性：" << (chinaIdNumber->isLegal == true ? L"是" : L"否") << std::endl;
-    delete chinaIdNumber;
+        // 给定CVS文件地址初始化
+        //ChinaIdNumber::InitAreaNameMap(R"(C:\Users\smile\Documents\GitHub\ChinaIdNumberCheck\cmake-build-debug\address_code.csv)");
+
+        auto chinaIdNumber = new ChinaIdNumber(id);
+        std::wcout << L"身份证号：" << conv.from_bytes(id) << std::endl;
+        std::wcout << L"地区代码：" << conv.from_bytes(chinaIdNumber->GetAreaCode()) << std::endl;
+        std::wcout << L"地区：" << chinaIdNumber->GetAreaInfo() << std::endl;
+        std::wcout << L"出生日期：" << chinaIdNumber->GetBirthInfo() << std::endl;
+        std::wcout << L"性别：" << chinaIdNumber->GetGenderInfo() << std::endl;
+        std::wcout << L"年龄：" << chinaIdNumber->GetAgeInfo() << std::endl;
+        std::wcout << L"合法性：" << (chinaIdNumber->isLegal ? L"是" : L"否") << std::endl;
+        delete chinaIdNumber;
+    } catch (std::runtime_error &err) {
+        std::wcout << L"运行时错误：" << conv.from_bytes(err.what()) << std::endl;
+    } catch (std::length_error &err) {
+        std::wcout << L"长度错误：" << conv.from_bytes(err.what()) << std::endl;
+    }
+
     return 0;
 }

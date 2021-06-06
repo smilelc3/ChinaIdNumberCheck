@@ -40,6 +40,7 @@ ChinaIdNumber::ChinaIdNumber(std::string &idStr) {
     new(this) ChinaIdNumber(id);
 }
 
+
 // 静态成员实现，预分配空间大小
 decltype(ChinaIdNumber::areaNameMap) ChinaIdNumber::areaNameMap(1<<18); // NOLINT
 
@@ -47,6 +48,10 @@ void ChinaIdNumber::InitAreaNameMap(const std::string& csvFilePath) {
     std::ifstream fp(csvFilePath);
     std::string line;  // 每行 bytes源码
     size_t row = 0;
+
+    if (not fp.is_open()) {
+        throw std::runtime_error(csvFilePath + " not Found!");
+    }
 
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 
